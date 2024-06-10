@@ -1,25 +1,33 @@
 # LLM4Devs
-
-Olá! Que honra ter você conosco no Bootcamp LLM4Devs! Espero que o bootcamp seja muito útil na sua jornada na criação de aplicações baseadas em LLMs.
-
-Antes de começarmos, vamos nos certificar que você com seu ambiente pronto para o bootcamp -- e assim focamos nosso tempo de sábado para as atividades *hands on*.
-
+Olá, o aplicativo desse repositório foi feito a partir do bootcamp LLM4Devs ministrado pelo professor Gustavo Pinto. O
+chatbot foi criado como exercício pós botcamp e tem o objetivo de me auxiliar a estudar para o concurso do Banco 
+Central. Os dados coletados para treinamento não serão compartilhados, mas eles incluem o edital atualizado, exemplos 
+de provas discursivas do Cebraspe e apostilas das disciplinas, todos em pdfs.
 ## Ferramentas
 
-Para esse bootcamp, iremos utilizar Python como linguagem de programação e o Postgres como banco de dados. Certifique-se que você conseguiu instalar e configurar ambos. Versões recomendadas:
+Foi utilizado Python como linguagem de programação e uma imagem docker com pgvactor + postgres como banco de dados. 
 
 - Python: 3.10 ou superior
-- PostgreSQL: 15 ou superior
+- Docker
 
 Todas as demais dependencias serão instaladas via `pip`.
 
 ## Crie um ambiente virtual e instale as dependencias do Python
 
-Para não criar uma confusão com as bibliotecas do seu sistema e as que serão utilizadas no bootcamp, é recomendado criar um ambiente virtual separado.
+Para não criar uma confusão com as bibliotecas do seu sistema e as que serão utilizadas , foi criado
+um ambiente virtual separado.
 
+No Mac ou Linux
 ```
 python3 -m venv env
+
 source env/bin/activate
+```
+No windows
+```
+python -m venv env
+
+./env/bin/activate
 ```
 
 Em seguida, instale as bibliotecas: 
@@ -28,46 +36,60 @@ Em seguida, instale as bibliotecas:
 pip install -r requirements.txt
 ```
 
-## Instale a extensão pgvector do Postgres
+## Baixe a imagem do Postgres + Pgvector utilizando Docker com docker-compose
 
-O PGVector é uma ferramenta muito importante para criação de aplicações baseadas em LLMs, uma vez que ele fornece novos tipos de armazenamento e busca de dados. Para instalá-lo, siga as instruções abaixo.
+O PGVector é uma ferramenta muito importante para criação de aplicações baseadas em LLMs, uma vez que ele fornece novos 
+tipos de armazenamento e busca de dados. Considerando que você já tenha o docker em sua máquina, para utiliza-lo com uma
+imagem Postgres, siga as instruções abaixo:
 
-Para usuários Linux, o pgvector pode ser instalado via APT:
+crie um arquivo docker-compose.yaml e copie o código a seguir:
+
+``` yaml
+
+version: '3.9'
+
+services:
+  db:
+    hostname: db
+    image: ankane/pgvector
+    ports:
+     - 5432:5432
+    restart: always
+    environment:
+      - POSTGRES_DB= ${POSTGRES_DB} # Base de dados será criada ao iniciar o container
+      - POSTGRES_USER= ${POSTGRES_USER} # Usuário que será criado ao iniciar o container
+      - POSTGRES_PASSWORD= ${POSTGRES_PASSWORD} # Senha do usuário que será criado ao iniciar o container
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+     - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Script sql que será executado ao iniciar o container
+     - ./data_sources/postgres-data:/var/lib/postgresql/data # Diretório '/data_sources/postgres-data' no comptuador 
+                                                             # hospedeiro armazena os dados do postgres no container
+                                                             # '/var/lib/postgresql/data'
 
 ```
-sudo apt install postgresql-16-pgvector
-```
 
-Para usuários macOS, pode-se utilizar o homebrew: 
-
-```
-brew install pgvector
-```
-
-Para demais métodos de instalação, consulte o [repositório oficial](https://github.com/pgvector/pgvector).
-
-### Crie uma base de dados no postgres
-
-Uma vez instalado, crie uma base de dados e uma tabela usando o tipo `VECTOR`. Primeiro, se conecte via linha de comando no seu banco de dados;
-
-
-```bash
-$ psql -h 127.0.0.1 -U postgres
-```
-
-Uma vez conectado, rode o script abaixo para criar a base e a tabela.
-
+crie o arquivo 'init.sql' no diretório do docker-compose.yaml e compie o escript a baixo:
 
 ```sql 
-CREATE DATABASE bootcamp_llm;
-
-\c bootcamp_llm
-
 CREATE EXTENSION IF NOT EXISTS vector;
 
-DROP TABLE IF EXISTS embeddings;
+-- DROP TABLE IF EXISTS embeddings;
 
-CREATE TABLE IF NOT EXISTS embeddings (
+CREATE TABLE IF NOT EXISTS edital_bacen (
+    id SERIAL PRIMARY KEY,
+    content TEXT,
+    chars INTEGER,
+    embeddings VECTOR
+);
+
+CREATE TABLE IF NOT EXISTS nocoes_economia (
+    id SERIAL PRIMARY KEY,
+    content TEXT,
+    chars INTEGER,
+    embeddings VECTOR
+);
+
+CREATE TABLE IF NOT EXISTS discursiva (
     id SERIAL PRIMARY KEY,
     content TEXT,
     chars INTEGER,
@@ -75,9 +97,16 @@ CREATE TABLE IF NOT EXISTS embeddings (
 );
 ```
 
+para baixar a imagem, criar, executar o container execute o comando a baixo:
+
+``` bash
+docker-compose up
+```
+
 ## Configure acesso a OpenAI
 
-Muito do nosso trabalho será baseado nas APIs da OpenAI. Para isso, você precisa criar uma chave para acessar a [plataforma da OpenAI](https://platform.openai.com/). 
+Muito do nosso trabalho será baseado nas APIs da OpenAI. Para isso, você precisa criar uma chave para acessar a
+[plataforma da OpenAI](https://platform.openai.com/). 
 
 Em seguida, adicione a variavel de ambiente `OPENAI_API_KEY` dentro do arquivo `.env`.
 
@@ -89,7 +118,7 @@ OPENAI_API_KEY = "<CHAVE>"
 
 Por fim, para garantir que a configuracao foi bem sucedida, rode o seguinte comando:
 
-- `python3 $PATH/bootcamp-llm4devs/backend/core/main.py`
+- `python3 $PATH/bootcamp-llm4devs/core/main.py`
 
 ## Exercícios pós-bootcamp
 
@@ -99,6 +128,7 @@ Após o bootcamp, para continuar progredindo nos estudos, considere implementar 
 - Teste o exercício do bootcamp com outro modelo  (como o Gemini-pro, mistral, etc). 
 - Busque novas fontes de dados de outros formatos (arquivos PDFs, vídeos do YouTube).
 - Estude como os dados são inseridos no banco. Brinque com os tamanhos e estratégias de chunking.
-- Estudo e implemente diferentes estratégias para limpeza de dados. Pense como essas estratégias podem ser utilizadas em diferentes tipos de dados (considere tipos de dados como XML, JSON, trechos de código, tabelas, etc). 
+- Estudo e implemente diferentes estratégias para limpeza de dados. Pense como essas estratégias podem ser utilizadas em
+- diferentes tipos de dados (considere tipos de dados como XML, JSON, trechos de código, tabelas, etc). 
 
 Ao longo da sua implementação, usse o Discord para discutir suas soluções.
