@@ -1,4 +1,4 @@
-gradio==4.31.3
+gradio==5.0.1
 langchain==0.1.20
 langchain-openai==0.1.7
 pgvector==0.2.5 
@@ -6,3 +6,5 @@ psycopg2==2.9.9
 python-dotenv==1.0.1
 uvicorn==0.29.0
 langchain-text-splitters==0.0.2
+pypdf==5.0.1
+cryptography==3.4.8
