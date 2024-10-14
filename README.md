@@ -1,8 +1,7 @@
 # LLM4Devs
 Olá, o aplicativo desse repositório foi feito a partir do bootcamp LLM4Devs ministrado pelo professor Gustavo Pinto. O
-chatbot foi criado como exercício pós botcamp e tem o objetivo de me auxiliar a estudar para o concurso do Banco 
-Central. Os dados coletados para treinamento não serão compartilhados, mas eles incluem o edital atualizado, exemplos 
-de provas discursivas do Cebraspe e apostilas das disciplinas, todos em pdfs.
+chatbot foi criado como exercício pós botcamp e tem o objetivo de auxiliar o usuário no aprendizado de algoritmos, 
+padrões de projeto e desenvolvimento guiado por teste - TDD.
 ## Ferramentas
 
 Foi utilizado Python como linguagem de programação e uma imagem docker com pgvactor + postgres como banco de dados. 
@@ -21,13 +20,13 @@ No Mac ou Linux
 ```
 python3 -m venv env
 
-source env/bin/activate
+source env/Scripts/activate
 ```
 No windows
 ```
 python -m venv env
 
-./env/bin/activate
+./env/Scripts/activate
 ```
 
 Em seguida, instale as bibliotecas: 
@@ -75,21 +74,21 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 -- DROP TABLE IF EXISTS embeddings;
 
-CREATE TABLE IF NOT EXISTS edital_bacen (
+CREATE TABLE IF NOT EXISTS algorithms (
     id SERIAL PRIMARY KEY,
     content TEXT,
     chars INTEGER,
     embeddings VECTOR
 );
 
-CREATE TABLE IF NOT EXISTS nocoes_economia (
+CREATE TABLE IF NOT EXISTS design_patterns (
     id SERIAL PRIMARY KEY,
     content TEXT,
     chars INTEGER,
     embeddings VECTOR
 );
 
-CREATE TABLE IF NOT EXISTS discursiva (
+CREATE TABLE IF NOT EXISTS tdd (
     id SERIAL PRIMARY KEY,
     content TEXT,
     chars INTEGER,
@@ -108,17 +107,26 @@ docker-compose up
 Muito do nosso trabalho será baseado nas APIs da OpenAI. Para isso, você precisa criar uma chave para acessar a
 [plataforma da OpenAI](https://platform.openai.com/). 
 
-Em seguida, adicione a variavel de ambiente `OPENAI_API_KEY` dentro do arquivo `.env`.
-
+Em seguida, adicione as seguintes variáveis de ambiente:
 ```
-OPENAI_API_KEY = "<CHAVE>"
+OPENAI_API_KEY          // Chave de api da OpenAI
+SERVER_APP_IPV4         // Ip da aplicação
+SERVER_APP_PORT         // Porta da aplicação
+POSTGRES_DB             // Nome da base de dados
+POSTGRES_USER           // Usuário do banco
+POSTGRES_PASSWORD       // Senha do banco
+POSTGRES_HOST           // Host do banco
+POSTGRES_PORT           // Porta do banco
 ```
 
 ## Rode a interface web
 
 Por fim, para garantir que a configuracao foi bem sucedida, rode o seguinte comando:
 
-- `python3 $PATH/bootcamp-llm4devs/core/main.py`
+```bash 
+python ./core/main.py
+```
+
 
 ## Exercícios pós-bootcamp
 
